@@ -21,7 +21,7 @@ type DatabaseConfiguration struct {
 	Database  string `json:"database"`
 }
 
-// GetSecretManagerCredentials ------------------------------------------------------------------
+// GetCredentialsFromSecretManager ------------------------------------------------------------------
 func GetCredentialsFromSecretManager(ctx context.Context, secretPath string) (DatabaseConfiguration, error) {
 
 	dbc := DatabaseConfiguration{}
@@ -66,6 +66,10 @@ func GetCredentialsFromSecretEnvironmentVariable() (DatabaseConfiguration, error
 
 // Connect -------------------------------------------------------
 func Connect(dbc *DatabaseConfiguration) (*sql.DB, error) {
+
+	if len(os.Getenv("DEVELOPMENT")) > 0 {
+		return ConnectionByPublicIP(dbc)
+	}
 
 	if len(dbc.Host) == 0 {
 		return nil, fmt.Errorf("missing Host")
