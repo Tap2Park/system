@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	secretmanagerpb "google.golang.org/genproto/googleapis/cloud/secretmanager/v1"
@@ -20,6 +21,8 @@ type DatabaseConfiguration struct {
 	Password  string `json:"password"`
 	Database  string `json:"database"`
 }
+
+var ErrConnectionError = errors.New("unexpected error connecting to database")
 
 // GetCredentialsFromSecretManager ------------------------------------------------------------------
 func GetCredentialsFromSecretManager(ctx context.Context, secretPath string) (DatabaseConfiguration, error) {
@@ -133,7 +136,7 @@ func ConnectionByPrivateIP(dbc *DatabaseConfiguration) (*sql.DB, error) {
 func _sqlConnectionConfig(link *sql.DB) {
 	_, _ = link.Exec("SET time_zone = 'Europe/London'")
 	// source: https://www.alexedwards.net/blog/configuring-sqldb
-	link.SetMaxOpenConns(5)
+	//link.SetMaxOpenConns(5)
 	link.SetConnMaxIdleTime(2)
 	link.SetConnMaxLifetime(1 * time.Hour)
 }
